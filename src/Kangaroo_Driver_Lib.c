@@ -6,13 +6,6 @@
  */
 
 #include "Kangaroo_Driver_Lib.h"
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "COMMAND_LIST.h"
-#include "mraa.h"
-#include <unistd.h>
-
 
 /* This function should be called at the initialization of the setup.
  * This configures the Intel Edison to communicate with sabertooth through uart (8N1, BAUDRATE baud).
@@ -31,38 +24,33 @@ mraa_uart_context uart_setup() {
     mraa_uart_set_mode(uart0, 8,MRAA_UART_PARITY_NONE , 1);
   	mraa_uart_set_baudrate(uart0, BAUDRATEKANG);
 
-  	//wait for 3 seconds to allow time for things to settle down
-  	sleep(3);
+  	//wait for 1 seconds to allow time for things to settle down
+  	sleep(1);
 	return uart0;
 }
-/* Sets up the uart2 GS0 serial terminal. Disconnects debug console
+
+/* Sets up the uart2 GS0 serial terminal.
  */
 mraa_uart_context uartgs0_setup() {
 	 mraa_uart_context uart2;
-	 /*
-	    if (detach_console()) {
-	        fprintf(stdout, "Failed to detach system console.\n");
-	        fflush(stdout);
-	        return EXIT_FAILURE;
-	    }
-	    */
 
-	    uart2 = mraa_uart_init_raw("/dev/ttyGS0");
-	    //If this doesn't work type in "systemctl stop clloader"
-	    if (uart2 == NULL) {
-	        fprintf(stdout, "UART2 failed to setup\n");
-	        return EXIT_FAILURE;
-	    }
-	    else{
-	        printf("UART2 initialized\n");
-	    }
-	    mraa_uart_set_mode(uart2, 8,MRAA_UART_PARITY_NONE , 1);
-	    mraa_uart_set_baudrate(uart2, BAUDRATEMOBO);
+	 uart2 = mraa_uart_init_raw("/dev/ttyGS0");
+	 //If this doesn't work type in "systemctl stop clloader"
+	 if (uart2 == NULL) {
+		 fprintf(stdout, "UART2 failed to setup\n");
+		 return EXIT_FAILURE;
+	 }
+	 else{
+		 printf("UART2 initialized\n");
+	 }
+	 mraa_uart_set_mode(uart2, 8,MRAA_UART_PARITY_NONE , 1);
+	 mraa_uart_set_baudrate(uart2, BAUDRATEMOBO);
 
-	    //wait for 3 seconds to allow time for things to settle down
-	    sleep(3);
-	    return uart2;
+	 //wait for 1 second to allow time for things to settle down
+	 sleep(1);
+	 return uart2;
 }
+
 /**
  * Stops the uart connection and returns EXIT_SUCCESS if successful
  */
@@ -70,18 +58,6 @@ int uart_destroy(mraa_uart_context uart){
     mraa_uart_stop(uart);
     mraa_deinit();
     fprintf(stdout, "UART DESTROYED\n");
-    return EXIT_SUCCESS;
-}
-
-/**
- * Stops the uart2 connection and returns EXIT_SUCCESS if successful. Reconnects debug console
- * WE DON'T USE THIS NOW
- */
-int uart2_destroy(mraa_uart_context uart){
-    mraa_uart_stop(uart);
-    mraa_deinit();
-    reattach_console();
-    fprintf(stdout, "Console reattached.\n");
     return EXIT_SUCCESS;
 }
 
@@ -154,7 +130,6 @@ int32_t unpackNumber(uint8_t* buffer, uint8_t dataLength){
  * Notes:           Use this function to write a command into a buffer. The buffer can be
  *                  used to send the command to the Kangaroo using the mraa_uart_write function.
  *********************************************************************************************/
-
 size_t write_kangaroo_command(uint8_t address, uint8_t command, const uint8_t* data,
                               uint8_t length, uint8_t* buffer){
 
@@ -306,7 +281,6 @@ struct velocity_Data readMoveSpeed(mraa_uart_context uart, uint8_t address, uint
 	return returnData;
 }
 
-
 /**********************************************************************************************
  * Function:        clearRead(mraa_uart_context uart)
  * Input:           uart: the uart context to be cleared
@@ -322,7 +296,7 @@ void clearRead(mraa_uart_context uart){
 }
 
 /**********************************************************************************************
- * Function:        readAndSetMotors
+ * Function:        readMotors
  * Input:           buffer: Pointer to the buffer of speeds Size should be 4. (LF RF LB RB)
  * 					uart: The uart context to be read.
  * 					uint8_t adrFront: address of front motors
@@ -408,4 +382,3 @@ void readMotors(mraa_uart_context uart, int32_t* buf){
 	}
 	return;
 }
-
