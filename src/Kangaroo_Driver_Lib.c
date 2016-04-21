@@ -35,6 +35,7 @@ mraa_uart_context uartgs0_setup() {
 	 mraa_uart_context uart2;
 
 	 uart2 = mraa_uart_init_raw("/dev/ttyGS0");
+	 system("systemctl stop clloader");
 	 //If this doesn't work type in "systemctl stop clloader"
 	 if (uart2 == NULL) {
 		 fprintf(stdout, "UART2 failed to setup\n");
@@ -166,21 +167,10 @@ void start_channel(mraa_uart_context uart, uint8_t address, uint8_t channel_name
     // data for start command
     data[0] = channel_name;         // channel name, usually "1" or "2"
     data[1] = 0;                    // flags
-    struct velocity_Data test;
 
-    test.readFlag = -1;
+    write_kangaroo_command(address, CMD_START, data, 2, buffer);
 
-    do {
-
-    	write_kangaroo_command(address, CMD_START, data, 2, buffer);
-
-    	mraa_uart_write(uart, buffer, 7);
-
-    	test = readMoveSpeed(uart, address, channel_name);
-
-    	//Clear the Read buffer from the Kangaroos
-    	clearRead(uart);
-    } while(test.readFlag != 0);
+    mraa_uart_write(uart, buffer, 7);
 
     fprintf(stdout, "Channel Initialized!\n");
 }
@@ -260,7 +250,7 @@ struct velocity_Data readMoveSpeed(mraa_uart_context uart, uint8_t address, uint
 	uint8_t dataBuffer[maxLength]; //Maximum size of return data
 
 	mraa_uart_read(uart, dataBuffer, 13);
-	fprintf(stdout,"\nNEW CMD:");
+	//fprintf(stdout,"\nNEW CMD:");
 
 	//Decode the data
 	struct velocity_Data returnData;
@@ -274,10 +264,16 @@ struct velocity_Data readMoveSpeed(mraa_uart_context uart, uint8_t address, uint
 	else{
 		returnData.readFlag = -1;
 		returnData.value = 0;
-		fprintf(stdout, "Read speed unsuccessful!");
+		//fprintf(stdout, "Read speed unsuccessful!");
 	}
-	fprintf(stdout, "readFlag: %d, value: %d\n", returnData.readFlag, returnData.value);
+	//fprintf(stdout, "readFlag: %d, value: %d\n", returnData.readFlag, returnData.value);
 
+	//If channel became disconnected, restart the channel
+	if(returnData.readFlag == 1){
+		power_down_channel(uart, address, channel_name);
+		start_channel(uart, address, channel_name);
+		fprintf(stdout, "Channel Restarted");
+	}
 	return returnData;
 }
 

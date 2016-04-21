@@ -15,8 +15,8 @@
 
 #define MAX_SPEED				4000
 #define DEADBAND				0.01
-#define BAUDRATEKANG			19200
-#define BAUDRATEMOBO			9600
+#define BAUDRATEKANG			115200
+#define BAUDRATEMOBO			115200
 
 	struct velocity_Data {
 		/* readFlag contains the flag of the reply command.
