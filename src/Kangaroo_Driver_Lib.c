@@ -33,9 +33,9 @@ mraa_uart_context uart_setup() {
  */
 mraa_uart_context uartgs0_setup() {
 	 mraa_uart_context uart2;
+	 system("systemctl stop clloader");
 
 	 uart2 = mraa_uart_init_raw("/dev/ttyGS0");
-	 system("systemctl stop clloader");
 	 //If this doesn't work type in "systemctl stop clloader"
 	 if (uart2 == NULL) {
 		 fprintf(stdout, "UART2 failed to setup\n");
@@ -250,7 +250,6 @@ struct velocity_Data readMoveSpeed(mraa_uart_context uart, uint8_t address, uint
 	uint8_t dataBuffer[maxLength]; //Maximum size of return data
 
 	mraa_uart_read(uart, dataBuffer, 13);
-	//fprintf(stdout,"\nNEW CMD:");
 
 	//Decode the data
 	struct velocity_Data returnData;
@@ -266,7 +265,7 @@ struct velocity_Data readMoveSpeed(mraa_uart_context uart, uint8_t address, uint
 		returnData.value = 0;
 		//fprintf(stdout, "Read speed unsuccessful!");
 	}
-	//fprintf(stdout, "readFlag: %d, value: %d\n", returnData.readFlag, returnData.value);
+	fprintf(stdout, "readFlag: %d, value: %d\n", returnData.readFlag, returnData.value);
 
 	//If channel became disconnected, restart the channel
 	if(returnData.readFlag == 1){

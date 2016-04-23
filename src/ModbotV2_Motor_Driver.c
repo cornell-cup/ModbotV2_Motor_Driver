@@ -4,23 +4,34 @@
  */
 
 #include "Kangaroo_Driver_Lib.h"
-//#include <time.h>       //for time tracking
+#include <pthread.h>
+#include <time.h>
 
-//void delay(int milliseconds);
+// Threads for reading commands and reading encoders
+pthread_t thread_command;
+pthread_t thread_encoder;
 
-int main()
-{
-    //Set up the uart connection
-    mraa_uart_context uartKang = uart_setup();
-    mraa_uart_context uartEdi = uartgs0_setup();
+// Kangaroos parameters
+uint8_t address1 = 128;
+uint8_t channelName1_1 = '1';
+uint8_t channelName1_2 = '2';
+uint8_t address2 = 129;
+uint8_t channelName2_1 = '1';
+uint8_t channelName2_2 = '2';
 
-    //Set up Kangaroos parameters
-    uint8_t address1 = 128;
-    uint8_t channelName1_1 = '1';
-    uint8_t channelName1_2 = '2';
-    uint8_t address2 = 129;
-    uint8_t channelName2_1 = '1';
-    uint8_t channelName2_2 = '2';
+// Uart connections
+mraa_uart_context uartKang;
+mraa_uart_context uartEdi;
+
+void delay(int milliseconds);
+void* receive_command();
+void* read_encoder();
+
+int main(){
+
+	//Set up the uart connection
+	uartKang = uart_setup();
+	uartEdi = uartgs0_setup();
 
     //Clear the Read buffers
     clearRead(uartKang);
@@ -32,73 +43,108 @@ int main()
     start_channel(uartKang, address2, channelName2_1);
     start_channel(uartKang, address2, channelName2_2);
 
-    while(1){
+	pthread_create(&thread_command,NULL,receive_command,NULL);
+	pthread_create(&thread_encoder,NULL,read_encoder,NULL);
 
-        //While data is not available, do nothing
-        while(!mraa_uart_data_available(uartEdi, 0)) {
-            //fprintf(stdout, "Waiting for data...\n");
-        }
-
-        //When data becomes available, store it into readBuffer and print speed values
-        int32_t speeds[4] = {0};
-        readMotors(uartEdi, speeds);
-        fprintf(stdout, "\nWrite speeds: %d %d %d %d\n", speeds[0], speeds[1], speeds[2], speeds[3]);
-
-        //Set speeds on motors
-        writeMoveSpeed(uartKang, address1, channelName1_1, speeds[0]);
-        writeMoveSpeed(uartKang, address1, channelName1_2, speeds[1]);
-        writeMoveSpeed(uartKang, address2, channelName2_1, speeds[2]);
-        writeMoveSpeed(uartKang, address2, channelName2_2, speeds[3]);
-
-        //Clear the Read buffer
-        clearRead(uartKang);
-
-        //Read speeds
-        readMoveSpeed(uartKang, address1, channelName1_1);
-        readMoveSpeed(uartKang, address1, channelName1_2);
-        readMoveSpeed(uartKang, address2, channelName2_1);
-        readMoveSpeed(uartKang, address2, channelName2_2);
-    }
+	while(1);
 
     //Destroy the uart context
     uart_destroy(uartKang);
     //uart_destroy(uartEdi);  //We get a memory problem if we destroy, so it's not required
-    return 0;
+
+	return 0;
 }
 
-/*
-    //Code to measure time to set and read speeds on motors
+void* receive_command(){
 
-    int32_t speeds[4] = {4000,-4000,-4000,4000};
-    clock_t timeWrite;
-    timeWrite = clock();
-    writeMoveSpeed(uartKang, address1, channelName1_1, speeds[0]);
-    writeMoveSpeed(uartKang, address1, channelName1_2, speeds[1]);
-    writeMoveSpeed(uartKang, address2, channelName2_1, speeds[2]);
-    writeMoveSpeed(uartKang, address2, channelName2_2, speeds[3]);
-    timeWrite = clock() - timeWrite;
-    double time_taken_write = ((double)timeWrite)/CLOCKS_PER_SEC; // in seconds
+	while(1){
 
-    printf("Took %f seconds to set 4 speeds \n", time_taken_write);
-    // Took 0.000152 seconds to set 4 speeds
-    // Took 0.000099 seconds to set 4 speeds
-    // Took 0.000095 seconds to set 4 speeds
-    // Took 0.000157 seconds to set 4 speeds
+		fprintf(stdout,"Reading command!\n");
 
-    delay(250);
+		//While data is not available, do nothing
+		while(!mraa_uart_data_available(uartEdi, 1000)) {
+			//fprintf(stdout, "Waiting for data...\n");
+		}
 
-    clock_t timeRead;
-    timeRead = clock();
-    readMoveSpeed(uartKang, address1, channelName1_1);
-    readMoveSpeed(uartKang, address1, channelName1_2);
-    readMoveSpeed(uartKang, address2, channelName2_1);
-    readMoveSpeed(uartKang, address2, channelName2_2);
-    timeRead = clock() - timeRead;
-    double time_taken_read = ((double)timeRead)/CLOCKS_PER_SEC; // in seconds
+		//When data becomes available, store it into readBuffer and print speed values
+		int32_t speeds[4] = {0};
+		readMotors(uartEdi, speeds);
+		fprintf(stdout, "\nWrite speeds: %d %d %d %d\n", speeds[0], speeds[1], speeds[2], speeds[3]);
 
-    printf("Took %f seconds to read 4 speeds \n", time_taken_read);
-    // Took 0.001289 seconds to read 4 speeds
-    // Took 0.001397 seconds to read 4 speeds
-    // Took 0.001263 seconds to read 4 speeds
-    // Took 0.001342 seconds to read 4 speeds
-*/
+		//Set speeds on motors
+		writeMoveSpeed(uartKang, address1, channelName1_1, speeds[0]);
+		writeMoveSpeed(uartKang, address1, channelName1_2, speeds[1]);
+		writeMoveSpeed(uartKang, address2, channelName2_1, speeds[2]);
+		writeMoveSpeed(uartKang, address2, channelName2_2, speeds[3]);
+	}
+
+	while(0){
+		//Code to measure time to set and read speeds on motors
+
+		int32_t speeds[4] = {4000,-4000,-4000,4000};
+		clock_t timeWrite;
+		timeWrite = clock();
+		writeMoveSpeed(uartKang, address1, channelName1_1, speeds[0]);
+		writeMoveSpeed(uartKang, address1, channelName1_2, speeds[1]);
+		writeMoveSpeed(uartKang, address2, channelName2_1, speeds[2]);
+		writeMoveSpeed(uartKang, address2, channelName2_2, speeds[3]);
+		timeWrite = clock() - timeWrite;
+		double time_taken_write = ((double)timeWrite)/CLOCKS_PER_SEC; // in seconds
+
+		printf("Took %f seconds to set 4 speeds \n", time_taken_write);
+		// Took 0.000152 seconds to set 4 speeds
+		// Took 0.000099 seconds to set 4 speeds
+		// Took 0.000095 seconds to set 4 speeds
+		// Took 0.000157 seconds to set 4 speeds
+
+		delay(250);
+
+		clock_t timeRead;
+		timeRead = clock();
+		readMoveSpeed(uartKang, address1, channelName1_1);
+		readMoveSpeed(uartKang, address1, channelName1_2);
+		readMoveSpeed(uartKang, address2, channelName2_1);
+		readMoveSpeed(uartKang, address2, channelName2_2);
+		timeRead = clock() - timeRead;
+		double time_taken_read = ((double)timeRead)/CLOCKS_PER_SEC; // in seconds
+
+		printf("Took %f seconds to read 4 speeds \n", time_taken_read);
+		// Took 0.001289 seconds to read 4 speeds
+		// Took 0.001397 seconds to read 4 speeds
+		// Took 0.001263 seconds to read 4 speeds
+		// Took 0.001342 seconds to read 4 speeds
+
+		while(1);
+	}
+
+    pthread_exit(NULL);
+}
+
+void* read_encoder(){
+
+	while(1) {
+		//Clear the Read buffer
+		clearRead(uartKang);
+
+		//Read speeds
+		readMoveSpeed(uartKang, address1, channelName1_1);
+		readMoveSpeed(uartKang, address1, channelName1_2);
+		readMoveSpeed(uartKang, address2, channelName2_1);
+		readMoveSpeed(uartKang, address2, channelName2_2);
+
+		delay(17);
+	}
+
+	pthread_exit(NULL);
+}
+
+void delay(int milliseconds)
+{
+	long pause;
+	clock_t now,then;
+
+	pause = milliseconds*(CLOCKS_PER_SEC/1000);
+	now = then = clock();
+	while( (now-then) < pause )
+		now = clock();
+}
