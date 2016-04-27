@@ -265,7 +265,7 @@ struct velocity_Data readMoveSpeed(mraa_uart_context uart, uint8_t address, uint
 		returnData.value = 0;
 		//fprintf(stdout, "Read speed unsuccessful!");
 	}
-	fprintf(stdout, "readFlag: %d, value: %d\n", returnData.readFlag, returnData.value);
+	//fprintf(stdout, "readFlag: %d, value: %d\n", returnData.readFlag, returnData.value);
 
 	//If channel became disconnected, restart the channel
 	if(returnData.readFlag == 1){
@@ -329,7 +329,7 @@ void readMotors(mraa_uart_context uart, int32_t* buf){
 		int32_t RF = speeds[1] * speedFactor;
 		int32_t LB = speeds[2] * speedFactor;
 		int32_t RB = speeds[3] * speedFactor;
-		fprintf(stdout, "INCOMING SPEEDS: %d %d %d %d\n",speeds[0], speeds[1], speeds[2], speeds[3]);
+		//fprintf(stdout, "INCOMING SPEEDS: %d %d %d %d\n",speeds[0], speeds[1], speeds[2], speeds[3]);
 
 		char directionChar = directions[0];
 
