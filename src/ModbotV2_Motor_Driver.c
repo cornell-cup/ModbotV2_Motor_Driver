@@ -87,11 +87,20 @@ void* read_encoder(){
 		//Clear the Read buffer
 		clearRead(uartKang);
 
+		int32_t motor_vels[4] = {0}; //Array to hold speeds of motors
 		//Read speeds
-		readMoveSpeed(uartKang, address1, channelName1_1);
-		readMoveSpeed(uartKang, address1, channelName1_2);
-		readMoveSpeed(uartKang, address2, channelName2_1);
-		readMoveSpeed(uartKang, address2, channelName2_2);
+		velocity_t motor1_vel = readMoveSpeed(uartKang, address1, channelName1_1);
+		velocity_t motor2_vel = readMoveSpeed(uartKang, address1, channelName1_2);
+		velocity_t motor3_vel = readMoveSpeed(uartKang, address2, channelName2_1);
+		velocity_t motor4_vel = readMoveSpeed(uartKang, address2, channelName2_2);
+
+		motor_vels[0] = motor1_vel.value;
+		motor_vels[1] = motor2_vel.value;
+		motor_vels[2] = motor3_vel.value;
+		motor_vels[3] = motor4_vel.value;
+
+		//Write the motor velocities to the edison. Commented out until we have functionality to write data.
+		//mraa_uart_write(uartEdi, motor_vels, sizeof(motor_vels));
 
 		delay(17);
 	}

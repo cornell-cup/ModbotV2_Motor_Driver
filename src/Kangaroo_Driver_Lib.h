@@ -18,7 +18,7 @@
 #define BAUDRATEKANG			115200
 #define BAUDRATEMOBO			115200
 
-	struct velocity_Data {
+	typedef struct velocity_Data {
 		/* readFlag contains the flag of the reply command.
 		 * readFlag = 0 indicates no error in the reading.
 		 * readFlag = 1 indicates the reply is an error. The value in value
@@ -30,7 +30,7 @@
 		/* if readFlag = 0 or 2, value contains the current speed.
 		 * if readFlag = 1, value contains the error code.*/
 		int32_t value;
-	};
+	} velocity_t;
 
     mraa_uart_context uart_setup();
 
