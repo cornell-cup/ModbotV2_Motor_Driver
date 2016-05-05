@@ -70,7 +70,7 @@ void* receive_command(){
 		//When data becomes available, store it into readBuffer and print speed values
 		int32_t speeds[4] = {0};
 		readMotors(uartEdi, speeds);
-		//fprintf(stdout, "\nWrite speeds: %d %d %d %d\n", speeds[0], speeds[1], speeds[2], speeds[3]);
+		fprintf(stdout, "\nWrite speeds: %d %d %d %d\n", speeds[0], speeds[1], speeds[2], speeds[3]);
 
 		//Set speeds on motors
 		writeMoveSpeed(uartKang, address1, channelName1_1, speeds[0]);
@@ -101,8 +101,9 @@ void* read_encoder(){
 
 		//Write the motor velocities to the edison. Commented out until we have functionality to write data.
 		//mraa_uart_write(uartEdi, motor_vels, sizeof(motor_vels));
+		fprintf(stdout, "\nREAD speeds: %d %d %d %d\n", motor_vels[0], motor_vels[1], motor_vels[2], motor_vels[3]);
 
-		delay(17);
+		delay(250);
 	}
 
 	pthread_exit(NULL);
