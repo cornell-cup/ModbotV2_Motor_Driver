@@ -243,16 +243,27 @@ struct velocity_Data readMoveSpeed(mraa_uart_context uart, uint8_t address, uint
 	data[length ++] = parameters;
 	uint8_t buffer[length+5];
 
+	struct velocity_Data returnData;
+
 	//First send the "GET" command
 	write_kangaroo_command(address, CMD_GET, data, length, buffer);
 	mraa_uart_write(uart, buffer, length+5);
 	int maxLength = 13;
 	uint8_t dataBuffer[maxLength]; //Maximum size of return data
 
-	mraa_uart_read(uart, dataBuffer, 13);
+	if(mraa_uart_data_available(uart,10)){
+		mraa_uart_read(uart, dataBuffer, 13);
+	}
+	else{
+		returnData.readFlag = -1;
+		returnData.value = 0;
+		power_down_channel(uart, address, channel_name);
+		start_channel(uart, address, channel_name);
+		fprintf(stdout, "Channel Restarted");
+	}
 
 	//Decode the data
-	struct velocity_Data returnData;
+
 	if((dataBuffer[0] == address) && (dataBuffer[1] == CMD_REPLY) && (dataBuffer[3] == channel_name)){
 		//The data buffer is correct
 		returnData.readFlag = dataBuffer[4];
