@@ -344,21 +344,27 @@ void readMotors(mraa_uart_context uart, int32_t* buf){
 
 		char directionChar = directions[0];
 
-		char LFDir = (0x08 & directionChar);
-		if(LFDir == 0x00){
-			LF = LF * -1;
+		//fprintf(stdout, "Direction Char: %d\n", directionChar);
+
+		//Motor 1
+		char RBDir = (0x08 & directionChar);
+		if(RBDir == 0x00){
+			RB = RB * -1;
 		}
+		//Motor 2
 		char RFDir = (0x04 & directionChar);
 		if(RFDir == 0x00){
 			RF = RF * -1;
 		}
+		//Motor 3
 		char LBDir = (0x02 & directionChar);
 		if(LBDir == 0x00){
 			LB = LB * -1;
 		}
-		char RBDir = (0x01 & directionChar);
-		if(RBDir == 0x00){
-			RB = RB * -1;
+		//Motor 4
+		char LFDir = (0x01 & directionChar);
+		if(LFDir == 0x00){
+			LF = LF * -1;
 		}
 
 		//If the speeds are within 1% of 0 - MAX_SPEED, then disregard and set equal to 0.
