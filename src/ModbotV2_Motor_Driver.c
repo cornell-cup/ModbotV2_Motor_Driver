@@ -12,12 +12,10 @@ pthread_t thread_command;
 pthread_t thread_encoder;
 
 // Kangaroos parameters
-uint8_t address1 = 128;
-uint8_t channelName1_1 = '1';
-uint8_t channelName1_2 = '2';
-uint8_t address2 = 129;
-uint8_t channelName2_1 = '1';
-uint8_t channelName2_2 = '2';
+uint8_t address_front = 128;
+uint8_t channel_left = '1';
+uint8_t channel_right = '2';
+uint8_t address_back = 129;
 
 // Uart connections
 mraa_uart_context uartKang;
@@ -38,10 +36,10 @@ int main(){
     clearRead(uartEdi);
 
     //Start the Kangaroos channels
-    start_channel(uartKang, address1, channelName1_1);
-    start_channel(uartKang, address1, channelName1_2);
-    start_channel(uartKang, address2, channelName2_1);
-    start_channel(uartKang, address2, channelName2_2);
+    start_channel(uartKang, address_front, channel_left);
+    start_channel(uartKang, address_front, channel_right);
+    start_channel(uartKang, address_back, channel_left);
+    start_channel(uartKang, address_back, channel_right);
 
 	pthread_create(&thread_command,NULL,receive_command,NULL);
 
@@ -73,10 +71,10 @@ void* receive_command(){
 		fprintf(stdout, "\nWrite speeds: %d %d %d %d\n", speeds[0], speeds[1], speeds[2], speeds[3]);
 
 		//Set speeds on motors
-		writeMoveSpeed(uartKang, address1, channelName1_1, speeds[0]);
-		writeMoveSpeed(uartKang, address1, channelName1_2, speeds[1]);
-		writeMoveSpeed(uartKang, address2, channelName2_1, speeds[2]);
-		writeMoveSpeed(uartKang, address2, channelName2_2, speeds[3]);
+		writeMoveSpeed(uartKang, address_front, channel_left, speeds[LEFT_FRONT]);
+		writeMoveSpeed(uartKang, address_front, channel_right, speeds[RIGHT_FRONT]);
+		writeMoveSpeed(uartKang, address_back, channel_left, speeds[LEFT_BACK]);
+		writeMoveSpeed(uartKang, address_back, channel_right, speeds[RIGHT_BACK]);
 	}
     pthread_exit(NULL);
 }
@@ -89,10 +87,10 @@ void* read_encoder(){
 
 		int32_t motor_vels[4] = {0}; //Array to hold speeds of motors
 		//Read speeds
-		velocity_t motor1_vel = readMoveSpeed(uartKang, address1, channelName1_1);
-		velocity_t motor2_vel = readMoveSpeed(uartKang, address1, channelName1_2);
-		velocity_t motor3_vel = readMoveSpeed(uartKang, address2, channelName2_1);
-		velocity_t motor4_vel = readMoveSpeed(uartKang, address2, channelName2_2);
+		velocity_t motor1_vel = readMoveSpeed(uartKang, address_back, channel_right);
+		velocity_t motor2_vel = readMoveSpeed(uartKang, address_front, channel_right);
+		velocity_t motor3_vel = readMoveSpeed(uartKang, address_back, channel_left);
+		velocity_t motor4_vel = readMoveSpeed(uartKang, address_front, channel_left);
 
 		motor_vels[0] = motor1_vel.value;
 		motor_vels[1] = motor2_vel.value;

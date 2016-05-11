@@ -18,6 +18,12 @@
 #define BAUDRATEKANG			115200
 #define BAUDRATEMOBO			115200
 
+#define LEFT_FRONT				3
+#define RIGHT_FRONT				1
+#define LEFT_BACK				2
+#define RIGHT_BACK				0
+//By convention, the correct ordering of motors is RB, RF, LB, LF in order of 1, 2, 3, 4 respectively.
+
 	typedef struct velocity_Data {
 		/* readFlag contains the flag of the reply command.
 		 * readFlag = 0 indicates no error in the reading.

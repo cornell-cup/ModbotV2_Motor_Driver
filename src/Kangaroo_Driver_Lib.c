@@ -303,7 +303,7 @@ void clearRead(mraa_uart_context uart){
 
 /**********************************************************************************************
  * Function:        readMotors
- * Input:           buffer: Pointer to the buffer of speeds Size should be 4. (LF RF LB RB)
+ * Input:           buffer: Pointer to the buffer of speeds Size should be 4. (RB RF LB LF)
  * 					uart: The uart context to be read.
  * 					uint8_t adrFront: address of front motors
  * 					uint8_t adrBack: address of rear motors
@@ -336,10 +336,10 @@ void readMotors(mraa_uart_context uart, int32_t* buf){
 			return;
 		}
 
-		int32_t LF = speeds[0] * speedFactor;
-		int32_t RF = speeds[1] * speedFactor;
-		int32_t LB = speeds[2] * speedFactor;
-		int32_t RB = speeds[3] * speedFactor;
+		int32_t LF = speeds[LEFT_FRONT] * speedFactor;
+		int32_t RF = speeds[RIGHT_FRONT] * speedFactor;
+		int32_t LB = speeds[LEFT_BACK] * speedFactor;
+		int32_t RB = speeds[RIGHT_BACK] * speedFactor;
 		//fprintf(stdout, "INCOMING SPEEDS: %d %d %d %d\n",speeds[0], speeds[1], speeds[2], speeds[3]);
 
 		char directionChar = directions[0];
@@ -376,10 +376,10 @@ void readMotors(mraa_uart_context uart, int32_t* buf){
 			RB = 0;
 		}
 		//Write the speeds
-		buf[0] = LF;
-		buf[1] = RF;
-		buf[2] = LB;
-		buf[3] = RB;
+		buf[LEFT_FRONT] = LF;
+		buf[RIGHT_FRONT] = RF;
+		buf[LEFT_BACK] = LB;
+		buf[RIGHT_BACK] = RB;
 	}
 	else{
 		//Garbage
